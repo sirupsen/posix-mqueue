@@ -131,7 +131,7 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   struct mq_attr attr = {
     .mq_flags   = 0,          // Flags, 0 or O_NONBLOCK
     .mq_maxmsg  = 10,         // Max messages in queue
-    .mq_msgsize = 512,        // Max message size (bytes)
+    .mq_msgsize = 4096,       // Max message size (bytes)
     .mq_curmsgs = 0           // # currently in queue
   };
 

@@ -16,6 +16,8 @@ Still WIP. Not stable. Not everything works as promised.
 ## Usage
 
 ```ruby
+require 'posix/mqueue'
+
 m = POSIX::Mqueue.new("/whatever")
 m.send "hello"
 puts m.receive
@@ -27,5 +29,55 @@ fork { POSIX::Mqueue.new("/whatever").send("world") }
 m.receive
 # => "world"
 ```
+
+## mqueue
+
+Most important information from the manpages, with a little added information
+about the behavior of `posix-mqueue`.
+
+## /proc interfaces
+
+1. `/proc/sys/fs/mqueue/msg_max`. Contains the maximum number of messages in
+   queue. Defaults to 10. You should increase that number. `#send` will throw an
+   exception if the queue is full (instead of blocking).
+2. `/proc/sys/fs/mqueue/msgsize_max`. Maximum size of a single message. Defaults
+   to 8192 bytes. `posix-mqueue` defaults to 4096 bytes. You'll be able to
+   change this, soon!
+3. `/proc/sys/fs/mqueue/queues_max`. Maximum number of queues on the system.
+   Defaults to 256. Which is probably enough.
+
+## Virtual filesystem
+
+The message queue is created as a virtual file system. That means you can mount
+it:
+
+    # sudo mkdir /dev/queue
+    # sudo mount -t mqueue none /dev/queue
+
+Add a queue and a few tasks, count the characters and you'll see it's a total of 19 bytes:
+
+    $ irb
+    > require 'posix/mqueue'
+    => true
+    > m = POSIX::Mqueue.new("/queue")
+    => #<POSIX::Mqueue:0xb8c9fe88>
+    > m.send "narwhal"
+    => true
+    > m.send "walrus"
+    => true
+    > m.send "ponies"
+    => true
+    > exit
+
+Inspect the mounted filesystem:
+
+    $ ls /dev/queue/
+    important  mails  queue
+    $ cat /dev/queue/queue
+    QSIZE:19         NOTIFY:0     SIGNO:0     NOTIFY_PID:0
+
+Here `QSIZE` is the bytes of data in the queue. The other flags are about
+notifications which `posix-mqueue` does not support currently, read about them
+in [mq_overview(7)][pmq].
 
 [pmq]: http://man7.org/linux/man-pages/man7/mq_overview.7.html
