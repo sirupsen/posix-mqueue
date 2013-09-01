@@ -36,13 +36,12 @@ class MqueueTest < MiniTest::Unit::TestCase
   def test_multiple_queues
     @queue.send "hello"
 
-    other = POSIX::Mqueue.new("/other-test-queue")
-    other.send "world"
+    with_queue "/other-test-queue" do |q|
+      q.send "world"
+      assert_equal "world", q.receive
+    end
 
-    assert_equal "world", other.receive
     assert_equal "hello", @queue.receive
-
-    other.unlink
   end
 
   def test_timedsend_raises_exception_instead_of_blocking
@@ -71,20 +70,19 @@ class MqueueTest < MiniTest::Unit::TestCase
     end
 
     # Set to the maximum for Linux
-    w = POSIX::Mqueue.new("/big-queue", msgsize: 2 ** 13)
-    w.send('c' * (2 ** 13))
-    w.unlink
+    with_queue "/big-queue", msgsize: 2 ** 13 do |q|
+      q.send('c' * (2 ** 13))
+    end
   end
 
   def test_custom_max_queue_size
-    w = POSIX::Mqueue.new("/small-queue", maxmsg: 2)
-    2.times { w.send "narwhal" }
+    with_queue "/small-queue", maxmsg: 2 do |q|
+      2.times { q.send "narwhal" }
 
-    assert_raises POSIX::Mqueue::QueueFull do
-      w.timedsend("narwhal", 0, 0)
+      assert_raises POSIX::Mqueue::QueueFull do
+        q.timedsend("narwhal", 0, 0)
+      end
     end
-
-    w.unlink
   end
 
   def test_count_in_queue
@@ -95,5 +93,15 @@ class MqueueTest < MiniTest::Unit::TestCase
     @queue.send "third"
 
     assert_equal 3, @queue.size
+  end
+
+  private
+  def with_queue(name, options = {})
+    queue = POSIX::Mqueue.new(name, options)
+    begin
+      yield(queue)
+    ensure
+      queue.unlink
+    end
   end
 end
