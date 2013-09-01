@@ -28,6 +28,10 @@ fork { POSIX::Mqueue.new("/whatever").send("world") }
 # Blocks until the forked process pushes to the queue
 m.receive
 # => "world"
+
+# Deletes the queue and any messages remaining.
+# None in this case. Otherwise the queue will persist till reboot.
+m.unlink
 ```
 
 ## mqueue
