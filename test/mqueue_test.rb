@@ -86,4 +86,14 @@ class MqueueTest < MiniTest::Unit::TestCase
 
     w.unlink
   end
+
+  def test_count_in_queue
+    assert_equal 0, @queue.size
+
+    @queue.send "first"
+    @queue.send "second"
+    @queue.send "third"
+
+    assert_equal 3, @queue.size
+  end
 end

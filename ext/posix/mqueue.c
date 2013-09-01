@@ -181,6 +181,20 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE
   return Qtrue;
 }
 
+VALUE posix_mqueue_size(VALUE self)
+{
+  mqueue_t* data;
+  struct mq_attr queue;
+
+  TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
+
+  if (mq_getattr(data->fd, &queue) < 0) {
+    rb_sys_fail("Failed reading queue attributes, please consult mq_getattr(3)");
+  }
+
+  return INT2FIX(queue.mq_curmsgs);
+}
+
 VALUE posix_mqueue_receive(VALUE self)
 {
   int err;
@@ -259,6 +273,7 @@ void Init_mqueue()
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
   rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, 3);
   rb_define_method(mqueue, "timedreceive", posix_mqueue_timedreceive, 2);
+  rb_define_method(mqueue, "size", posix_mqueue_size, 0);
   rb_define_method(mqueue, "unlink", posix_mqueue_unlink, 0);
 }
 
