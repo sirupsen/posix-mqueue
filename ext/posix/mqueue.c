@@ -71,7 +71,7 @@ VALUE posix_mqueue_unlink(VALUE self)
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
   if (mq_unlink(data->queue) == -1) {
-    rb_sys_fail("Message queue unlinking failed");
+    rb_sys_fail("Message queue unlinking failed, please consume mq_unlink(3)");
   }
 
   return Qtrue;
@@ -92,7 +92,7 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   err = mq_send(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10);
 
   if (err < 0) {
-    rb_sys_fail("Message sending failed");
+    rb_sys_fail("Message sending failed, please consult mq_send(3)");
   }
   
   return Qtrue;
@@ -126,9 +126,9 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE
 
   if (err < 0) {
     if(errno == 110) {
-      rb_raise(rb_cQueueFull, "Queue full");
+      rb_raise(rb_cQueueFull, "Queue full, most likely you wanna bump /proc/sys/fs/mqueue/msg_max from the default maximum queue size of 10.");
     } else {
-      rb_sys_fail("Message sending failed");
+      rb_sys_fail("Message sending failed, please consult mq_send(3)");
     }
   }
   
@@ -155,7 +155,7 @@ VALUE posix_mqueue_receive(VALUE self)
   err = mq_receive(data->fd, buf, buf_size, NULL);
 
   if (err < 0) {
-    rb_sys_fail("Message retrieval failed");
+    rb_sys_fail("Message retrieval failed, please consult mq_receive(3)");
   }
 
   str = rb_str_new(buf, err);
@@ -189,7 +189,7 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   data->fd = mq_open(data->queue, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &data->attr);
 
   if (data->fd == (mqd_t)-1) {
-    rb_sys_fail("Failed opening the message queue");
+    rb_sys_fail("Failed opening the message queue, please consult mq_open(3)");
   }
 
   return self;

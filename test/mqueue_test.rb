@@ -52,4 +52,10 @@ class MqueueTest < MiniTest::Unit::TestCase
       @queue.timedsend(0, 0, "hi")
     end
   end
+
+  def test_errors_when_queue_name_is_not_slash_prefixed
+    assert_raises Errno::EINVAL do
+      POSIX::Mqueue.new("notvalid")
+    end
+  end
 end
