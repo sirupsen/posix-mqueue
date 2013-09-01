@@ -51,19 +51,19 @@ m.size
 
 # #send will block until something is popped off the now full queue.  
 # timesend takes timeout arguments (first one is seconds, second is
-# nanoseconds). Pass 0 for for both to not block.
+# nanoseconds). Pass 0 for for both to not block, this is default.
 
 assert_raises POSIX::Mqueue::QueueFull do
-  m.timedsend("I will fail", 0, 0)
+  m.timedsend "I will fail"
 end
 
 # Empty the queue again
 10.times { m.receive }
 
 # Like timedsend, timedreceive takes timeout arguments and will raise
-# POSIX::Mqueue::Queueempty when it would otherwise block
+# POSIX::Mqueue::Queueempty when it would otherwise block.
 assert_raises POSIX::Mqueue::QueueEmpty do
-  m.timedreceive(0, 0)
+  m.timedreceive
 end
 
 # Deletes the queue and any messages remaining.

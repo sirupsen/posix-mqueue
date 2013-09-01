@@ -99,7 +99,7 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   return Qtrue;
 }
 
-VALUE posix_mqueue_timedreceive(VALUE self, VALUE seconds, VALUE nanoseconds)
+VALUE posix_mqueue_timedreceive(VALUE self, VALUE args)
 {
   int err;
   mqueue_t* data;
@@ -107,6 +107,11 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE seconds, VALUE nanoseconds)
   char *buf;
   struct timespec timeout;
   VALUE str;
+  VALUE seconds = rb_ary_entry(args, 0);
+  VALUE nanoseconds = rb_ary_entry(args, 1);
+
+  if (seconds == Qnil) seconds = INT2FIX(0);
+  if (nanoseconds == Qnil) nanoseconds = INT2FIX(0);
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
@@ -145,11 +150,17 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE seconds, VALUE nanoseconds)
   return Qtrue;
 }
 
-VALUE posix_mqueue_timedsend(VALUE self, VALUE message, VALUE seconds, VALUE nanoseconds)
+VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
 {
   int err;
   mqueue_t* data;
   struct timespec timeout;
+  VALUE message = rb_ary_entry(args, 0);
+  VALUE seconds = rb_ary_entry(args, 1);
+  VALUE nanoseconds = rb_ary_entry(args, 2);
+
+  if (seconds == Qnil) seconds = INT2FIX(0);
+  if (nanoseconds == Qnil) nanoseconds = INT2FIX(0);
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
@@ -157,7 +168,7 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE message, VALUE seconds, VALUE nan
     rb_raise(rb_eTypeError, "Message must be a string"); 
   }
 
-  if (!RB_TYPE_P(seconds, T_FIXNUM)) { 
+  if (!RB_TYPE_P(seconds, T_FIXNUM)) {
     rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
   }
 
@@ -271,8 +282,8 @@ void Init_mqueue()
   rb_define_method(mqueue, "initialize", posix_mqueue_initialize, -2);
   rb_define_method(mqueue, "send", posix_mqueue_send, 1);
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
-  rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, 3);
-  rb_define_method(mqueue, "timedreceive", posix_mqueue_timedreceive, 2);
+  rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, -2);
+  rb_define_method(mqueue, "timedreceive", posix_mqueue_timedreceive, -2);
   rb_define_method(mqueue, "size", posix_mqueue_size, 0);
   rb_define_method(mqueue, "unlink", posix_mqueue_unlink, 0);
 }
