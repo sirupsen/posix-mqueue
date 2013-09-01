@@ -11,6 +11,8 @@ offers:
 
 Add `gem 'posix-mqueue'` to your favorite Gemfile.
 
+Still WIP. Not stable. Not everything works as promised.
+
 ## Usage
 
 ```ruby
