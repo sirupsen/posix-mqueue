@@ -16,6 +16,8 @@ Add `gem 'posix-mqueue'` to your favorite Gemfile.
 ```ruby
 require 'posix/mqueue'
 
+# On Linux the queue name must be prefixed with a slash. Note it is not a file
+# created at `/whatever`. It's just the name of the queue.
 m = POSIX::Mqueue.new("/whatever")
 m.send "hello"
 puts m.receive
