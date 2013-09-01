@@ -1,40 +1,47 @@
 require 'test_helper'
 
 class MqueueTest < MiniTest::Unit::TestCase
+  def setup
+    @queue_name = "/test-queue"
+    @queue = POSIX::Mqueue.new(@queue_name)
+  end
+
+  def teardown
+    @queue.unlink
+  end
+
   def test_send_and_receive_single_message
-    m = POSIX::Mqueue.new("/whatever")
-    m.send "hello"
-    assert_equal "hello", m.receive
+    @queue.send "hello"
+    assert_equal "hello", @queue.receive
   end
 
   def test_send_and_receive_multiple_messages
-    m = POSIX::Mqueue.new("/whatever")
-    m.send "hello"
-    m.send "world"
+    @queue.send "hello"
+    @queue.send "world"
 
-    assert_equal "hello", m.receive
-    assert_equal "world", m.receive
+    assert_equal "hello", @queue.receive
+    assert_equal "world", @queue.receive
   end
 
   def test_receiver_blocks
-    m = POSIX::Mqueue.new("/whatever")
-    m.send "hello"
+    @queue.send "hello"
 
-    assert_equal "hello", m.receive
+    assert_equal "hello", @queue.receive
 
-    fork { POSIX::Mqueue.new("/whatever").send("world") }
+    fork { POSIX::Mqueue.new(@queue_name).send("world") }
 
-    assert_equal "world", m.receive
+    assert_equal "world", @queue.receive
   end
 
   def test_multiple_queues
-    whatever = POSIX::Mqueue.new("/whatever")
-    whatever.send "hello"
+    @queue.send "hello"
 
-    omg = POSIX::Mqueue.new("/omg")
-    omg.send "world"
+    other = POSIX::Mqueue.new("/other-test-queue")
+    other.send "world"
 
-    assert_equal "world", omg.receive
-    assert_equal "hello", whatever.receive
+    assert_equal "world", other.receive
+    assert_equal "hello", @queue.receive
+
+    other.unlink
   end
 end
