@@ -146,8 +146,6 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE args)
   free(buf);
 
   return str;
-  
-  return Qtrue;
 }
 
 VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
