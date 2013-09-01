@@ -44,4 +44,12 @@ class MqueueTest < MiniTest::Unit::TestCase
 
     other.unlink
   end
+
+  # def test_send_raises_exception_instead_of_blocking
+  #   10.times { @queue.send "walrus" }
+
+  #   assert_raises Exception do
+  #     @queue.send "hi"
+  #   end
+  # end
 end

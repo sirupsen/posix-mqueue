@@ -1,3 +1,3 @@
 require 'mkmf'
 have_header('mqueue.h')
-create_makefile('mqueue')
+create_makefile('posix/mqueue')
