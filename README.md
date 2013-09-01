@@ -43,6 +43,16 @@ m.unlink
 assert_raises POSIX::Mqueue::QueueFull do
   m.timedsend(0, 0, "I will fail")
 end
+
+# Empty the queue again
+10.times { m.receive }
+
+# Like timedsend, timedreceive takes timeout arguments and will raise
+# POSIX::Mqueue::Queueempty when it would otherwise block
+assert_raises POSIX::Mqueue::QueueEmpty do
+  m.timedreceive(0, 0)
+end
+
 ```
 
 ## mqueue
