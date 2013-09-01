@@ -12,7 +12,7 @@ rb_mqueue_fd(const char *queue, const struct mq_attr *attr) {
   mqd_t fd = mq_open("/mqueue", O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, attr);
 
   if (fd == (mqd_t)-1) {
-    rb_sys_fail("fak rubby");
+    rb_sys_fail("Failed opening the message queue");
   }
 
   return fd;
@@ -69,7 +69,7 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
   if (!RB_TYPE_P(message, T_STRING)) { 
-    rb_raise(rb_eTypeError, "fak u rubby"); 
+    rb_raise(rb_eTypeError, "Message must be a string"); 
   }
 
   // FIXME: is rstring_len with or without \0?
@@ -77,7 +77,7 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   err = mq_send(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10);
 
   if (err < 0) {
-    rb_sys_fail("fak rubby");
+    rb_sys_fail("Message sending failed");
   }
   
   return Qtrue;
@@ -103,7 +103,7 @@ VALUE posix_mqueue_receive(VALUE self)
   err = mq_receive(data->fd, buf, buf_size, NULL);
 
   if (err < 0) {
-    rb_sys_fail("fak rubby");
+    rb_sys_fail("Message retrieval failed");
   }
 
   str = rb_str_new(buf, err);
