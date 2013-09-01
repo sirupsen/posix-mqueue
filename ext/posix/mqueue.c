@@ -4,9 +4,12 @@
 #include <mqueue.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #include <stdlib.h>
 #include <stdio.h>
+
+VALUE rb_cQueueFull = Qnil;
 
 typedef struct {
   mqd_t fd;
@@ -95,6 +98,43 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   return Qtrue;
 }
 
+VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE message)
+{
+  int err;
+  mqueue_t* data;
+  struct timespec timeout;
+
+  TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
+
+  if (!RB_TYPE_P(seconds, T_FIXNUM)) { 
+    rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
+  }
+
+  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
+    rb_raise(rb_eTypeError, "First argument must be a fixnum"); 
+  }
+
+  if (!RB_TYPE_P(message, T_STRING)) { 
+    rb_raise(rb_eTypeError, "Message must be a string"); 
+  }
+
+  timeout.tv_sec  = FIX2ULONG(seconds);
+  timeout.tv_nsec = FIX2ULONG(nanoseconds);
+
+  // TODO: Custom priority
+  err = mq_timedsend(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10, &timeout);
+
+  if (err < 0) {
+    if(errno == 110) {
+      rb_raise(rb_cQueueFull, "Queue full");
+    } else {
+      rb_sys_fail("Message sending failed");
+    }
+  }
+  
+  return Qtrue;
+}
+
 VALUE posix_mqueue_receive(VALUE self)
 {
   int err;
@@ -159,10 +199,13 @@ void Init_mqueue()
 {
   VALUE posix = rb_define_module("POSIX");
   VALUE mqueue = rb_define_class_under(posix, "Mqueue", rb_cObject);
+  rb_cQueueFull = rb_define_class_under(mqueue, "QueueFull", rb_eStandardError);
+
   rb_define_alloc_func(mqueue, posix_mqueue_alloc);
   rb_define_method(mqueue, "initialize", posix_mqueue_initialize, 1);
   rb_define_method(mqueue, "send", posix_mqueue_send, 1);
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
+  rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, 3);
   rb_define_method(mqueue, "unlink", posix_mqueue_unlink, 0);
 }
 
