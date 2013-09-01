@@ -29,7 +29,9 @@ require 'posix/mqueue'
 
 # On Linux the queue name must be prefixed with a slash. Note it is not a file
 # created at `/whatever`. It's just the name of the queue.
-m = POSIX::Mqueue.new("/whatever")
+# Set maximum default Linux options. See next section to push those limits.
+# Default options are msgsize: 10 and maxmsg: 4096
+m = POSIX::Mqueue.new("/whatever", msgsize: 10, maxmsg: 8192)
 m.send "hello"
 m.receive
 # => "hello"
