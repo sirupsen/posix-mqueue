@@ -121,7 +121,6 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE
   timeout.tv_sec  = FIX2ULONG(seconds);
   timeout.tv_nsec = FIX2ULONG(nanoseconds);
 
-  // TODO: Custom priority
   err = mq_timedsend(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10, &timeout);
 
   if (err < 0) {

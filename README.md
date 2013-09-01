@@ -32,6 +32,17 @@ m.receive
 # Deletes the queue and any messages remaining.
 # None in this case. Otherwise the queue will persist till reboot.
 m.unlink
+
+# Queue is now full by default Linux settings, see below on how to increase it.
+10.times { m.send rand(100).to_s }
+
+# #send will block until something is popped off the queue, but timedsend takes
+# timeout arguments (first one is seconds, second is nanoseconds). If you don't
+# want to block on send, pass 0 for both:
+
+assert_raises POSIX::Mqueue::QueueFull do
+  m.timedsend(0, 0, "I will fail")
+end
 ```
 
 ## mqueue
