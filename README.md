@@ -29,10 +29,6 @@ fork { POSIX::Mqueue.new("/whatever").send("world") }
 m.receive
 # => "world"
 
-# Deletes the queue and any messages remaining.
-# None in this case. Otherwise the queue will persist till reboot.
-m.unlink
-
 # Queue is now full by default Linux settings, see below on how to increase it.
 10.times { m.send rand(100).to_s }
 
@@ -52,6 +48,10 @@ end
 assert_raises POSIX::Mqueue::QueueEmpty do
   m.timedreceive(0, 0)
 end
+
+# Deletes the queue and any messages remaining.
+# None in this case. If not unlinked, the queue will persist till reboot.
+m.unlink
 
 ```
 
