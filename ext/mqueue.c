@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include <ruby/util.h>
 
 #include <mqueue.h>
 #include <fcntl.h>
@@ -10,6 +11,7 @@
 typedef struct {
   mqd_t fd;
   struct mq_attr attr;
+  size_t queue_len;
   char *queue;
 }
 mqueue_t;
@@ -36,13 +38,15 @@ mqueue_free(void* ptr)
 {
   mqueue_t* data = ptr;
   mq_close(data->fd);
+  xfree(data->queue);
   xfree(ptr);
 }
 
 static size_t
 mqueue_memsize(const void* ptr)
 {
-  return sizeof(mqueue_t);
+  const mqueue_t* data = ptr;
+  return sizeof(mqueue_t) + sizeof(char) * data->queue_len;
 }
 
 static const rb_data_type_t
@@ -140,7 +144,8 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
   data->attr = attr;
-  data->queue = StringValueCStr(queue);
+  data->queue_len = RSTRING_LEN(queue);
+  data->queue = ruby_strdup(StringValueCStr(queue));
 
   // FIXME: This is probably dangerous since I don't whether the value is
   // actually a string.
