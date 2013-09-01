@@ -16,17 +16,6 @@ typedef struct {
 }
 mqueue_t;
 
-mqd_t
-rb_mqueue_fd(mqueue_t *data) {
-  mqd_t fd = mq_open(data->queue, O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, &data->attr);
-
-  if (fd == (mqd_t)-1) {
-    rb_sys_fail("Failed opening the message queue");
-  }
-
-  return fd;
-}
-
 static void
 mqueue_mark(void* ptr)
 {
@@ -146,10 +135,11 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   data->attr = attr;
   data->queue_len = RSTRING_LEN(queue);
   data->queue = ruby_strdup(StringValueCStr(queue));
+  data->fd = mq_open(data->queue, O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, &data->attr);
 
-  // FIXME: This is probably dangerous since I don't whether the value is
-  // actually a string.
-  data->fd = rb_mqueue_fd(data);
+  if (data->fd == (mqd_t)-1) {
+    rb_sys_fail("Failed opening the message queue");
+  }
 
   return self;
 }
