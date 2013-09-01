@@ -31,7 +31,7 @@ require 'posix/mqueue'
 # created at `/whatever`. It's just the name of the queue.
 m = POSIX::Mqueue.new("/whatever")
 m.send "hello"
-puts m.receive
+m.receive
 # => "hello"
 
 fork { POSIX::Mqueue.new("/whatever").send("world") }
@@ -42,6 +42,10 @@ m.receive
 
 # Queue is now full by default Linux settings, see below on how to increase it.
 10.times { m.send rand(100).to_s }
+
+# #size returns the size of the queue
+m.size
+# => 10
 
 # #send will block until something is popped off the now full queue.  
 # timesend takes timeout arguments (first one is seconds, second is
