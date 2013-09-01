@@ -26,4 +26,15 @@ class MqueueTest < MiniTest::Unit::TestCase
 
     assert_equal "world", m.receive
   end
+
+  def test_multiple_queues
+    whatever = POSIX::Mqueue.new("/whatever")
+    whatever.send "hello"
+
+    omg = POSIX::Mqueue.new("/omg")
+    omg.send "world"
+
+    assert_equal "world", omg.receive
+    assert_equal "hello", whatever.receive
+  end
 end

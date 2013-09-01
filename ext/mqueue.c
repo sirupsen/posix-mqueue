@@ -9,7 +9,7 @@
 
 mqd_t
 rb_mqueue_fd(const char *queue, const struct mq_attr *attr) {
-  mqd_t fd = mq_open("/mqueue", O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, attr);
+  mqd_t fd = mq_open(queue, O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, attr);
 
   if (fd == (mqd_t)-1) {
     rb_sys_fail("Failed opening the message queue");
@@ -118,7 +118,7 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   // TODO: Set nonblock and handle error in #push
   struct mq_attr attr = {
     .mq_flags   = 0,    // Flags, 0 or O_NONBLOCK
-    .mq_maxmsg  = 100,  // Max messages in queue
+    .mq_maxmsg  = 10,  // Max messages in queue
     .mq_msgsize = 512,  // Max message size (bytes)
     .mq_curmsgs = 0     // # currently in queue
   };
