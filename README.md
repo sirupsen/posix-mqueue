@@ -37,11 +37,14 @@ about the behavior of `posix-mqueue`.
 
 ## /proc interfaces
 
-1. `/proc/sys/fs/mqueue/msg_max`. Contains the maximum number of messages in
-   queue. Defaults to 10. You should increase that number. `#send` will throw an
-   exception if the queue is full (instead of blocking).
+Linux has some default limits you can easily change.
+
+1. `/proc/sys/fs/mqueue/msg_max`. Contains the maximum number of messages in a
+   single queue. Defaults to 10. You should increase that number. `#send` will
+   eventually throw an exception if the queue is full (instead of blocking). It
+   does not do that right now.
 2. `/proc/sys/fs/mqueue/msgsize_max`. Maximum size of a single message. Defaults
-   to 8192 bytes. `posix-mqueue` defaults to 4096 bytes. You'll be able to
+   to 8192 bytes. `posix-mqueue` allows up to 4096 bytes. You'll be able to
    change this, soon!
 3. `/proc/sys/fs/mqueue/queues_max`. Maximum number of queues on the system.
    Defaults to 256. Which is probably enough.
@@ -54,7 +57,7 @@ it:
     # sudo mkdir /dev/queue
     # sudo mount -t mqueue none /dev/queue
 
-Add a queue and a few tasks, count the characters and you'll see it's a total of 19 bytes:
+Add a queue and a few tasks, count the characters (19):
 
     $ irb
     > require 'posix/mqueue'
