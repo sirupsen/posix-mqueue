@@ -210,14 +210,19 @@ VALUE posix_mqueue_receive(VALUE self)
   return str;
 }
 
-VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
+VALUE posix_mqueue_initialize(VALUE self, VALUE args)
 {
-  // TODO: Modify these options from initialize arguments
-  // TODO: Set nonblock and handle error in #push
+  VALUE options = rb_ary_entry(args, 1);
+  if (options == Qnil) options = rb_hash_new();
+
+  int msgsize = FIX2INT(rb_hash_lookup2(options, ID2SYM(rb_intern("msgsize")), INT2FIX(4096)));
+  int maxmsg = FIX2INT(rb_hash_lookup2(options, ID2SYM(rb_intern("maxmsg")), INT2FIX(10)));
+  VALUE queue = rb_ary_entry(args, 0);
+
   struct mq_attr attr = {
     .mq_flags   = 0,          // Flags, 0 or O_NONBLOCK
-    .mq_maxmsg  = 10,         // Max messages in queue
-    .mq_msgsize = 4096,       // Max message size (bytes)
+    .mq_maxmsg  = maxmsg,     // Max messages in queue
+    .mq_msgsize = msgsize,    // Max message size (bytes)
     .mq_curmsgs = 0           // # currently in queue
   };
 
@@ -249,7 +254,7 @@ void Init_mqueue()
   rb_cQueueEmpty = rb_define_class_under(mqueue, "QueueEmpty", rb_eStandardError);
 
   rb_define_alloc_func(mqueue, posix_mqueue_alloc);
-  rb_define_method(mqueue, "initialize", posix_mqueue_initialize, 1);
+  rb_define_method(mqueue, "initialize", posix_mqueue_initialize, -2);
   rb_define_method(mqueue, "send", posix_mqueue_send, 1);
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
   rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, 3);

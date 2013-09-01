@@ -64,4 +64,26 @@ class MqueueTest < MiniTest::Unit::TestCase
       POSIX::Mqueue.new("notvalid")
     end
   end
+
+  def test_custom_message_size
+    assert_raises Errno::EMSGSIZE do
+      @queue.send('c' * 4097) # one byte too large
+    end
+
+    # Set to the maximum for Linux
+    w = POSIX::Mqueue.new("/big-queue", msgsize: 2 ** 13)
+    w.send('c' * (2 ** 13))
+    w.unlink
+  end
+
+  def test_custom_max_queue_size
+    w = POSIX::Mqueue.new("/small-queue", maxmsg: 2)
+    2.times { w.send "narwhal" }
+
+    assert_raises POSIX::Mqueue::QueueFull do
+      w.timedsend(0, 0, "narwhal")
+    end
+
+    w.unlink
+  end
 end
