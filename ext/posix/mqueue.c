@@ -120,7 +120,7 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE args)
   }
 
   if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
-    rb_raise(rb_eTypeError, "First argument must be a fixnum"); 
+    rb_raise(rb_eTypeError, "Second argument must be a Fixnum"); 
   }
 
   timeout.tv_sec  = FIX2ULONG(seconds);
@@ -146,8 +146,6 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE args)
   free(buf);
 
   return str;
-  
-  return Qtrue;
 }
 
 VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
@@ -173,7 +171,7 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
   }
 
   if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
-    rb_raise(rb_eTypeError, "First argument must be a fixnum"); 
+    rb_raise(rb_eTypeError, "Second argument must be a Fixnum"); 
   }
 
   timeout.tv_sec  = FIX2ULONG(seconds);
@@ -183,7 +181,7 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
 
   if (err < 0) {
     if(errno == 110) {
-      rb_raise(rb_cQueueFull, "Queue full, most likely you wanna bump /proc/sys/fs/mqueue/msg_max from the default maximum queue size of 10.");
+      rb_raise(rb_cQueueFull, "Queue full, most likely you want to bump /proc/sys/fs/mqueue/msg_max from the default maximum queue size of 10.");
     } else {
       rb_sys_fail("Message sending failed, please consult mq_send(3)");
     }
