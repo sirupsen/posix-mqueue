@@ -52,11 +52,13 @@ static VALUE
 posix_mqueue_alloc(VALUE klass)
 {
   mqueue_t* data;
+  VALUE obj = TypedData_Make_Struct(klass, mqueue_t, &mqueue_type, data);
 
-  data->queue = NULL;
   data->fd = -1;
+  data->queue = NULL;
+  data->queue_len = 0;
 
-  return TypedData_Make_Struct(klass, mqueue_t, &mqueue_type, data);
+  return obj;
 }
 
 VALUE posix_mqueue_unlink(VALUE self)
@@ -136,8 +138,9 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   mqueue_t* data;
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
-  if (data->fd != (mqd_t)-1) {
-    rb_sys_fail("File descriptioner was illegaly modified before initialization")
+  if (data->fd != -1) {
+    // This would cause a memleak otherwise
+    rb_raise(rb_eRuntimeError, "Illegal reinitialization");
   }
 
   data->attr = attr;
