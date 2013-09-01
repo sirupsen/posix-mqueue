@@ -1,4 +1,4 @@
-# Posix::Mqueue
+# posix-mqueue
 
 Minimal wrapper around the [POSIX message queue](pmq). The POSIX message queue
 offers:
