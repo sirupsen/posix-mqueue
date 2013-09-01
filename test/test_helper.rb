@@ -3,4 +3,4 @@ require 'minitest/autorun'
 
 $: << File.dirname(__FILE__) + '/../ext'
 
-require 'mqueue.so'
+require "posix/mqueue/mqueue"
