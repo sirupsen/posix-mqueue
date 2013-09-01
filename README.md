@@ -54,7 +54,7 @@ m.size
 # nanoseconds). Pass 0 for for both to not block.
 
 assert_raises POSIX::Mqueue::QueueFull do
-  m.timedsend(0, 0, "I will fail")
+  m.timedsend("I will fail", 0, 0)
 end
 
 # Empty the queue again

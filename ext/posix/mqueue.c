@@ -145,7 +145,7 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE seconds, VALUE nanoseconds)
   return Qtrue;
 }
 
-VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE message)
+VALUE posix_mqueue_timedsend(VALUE self, VALUE message, VALUE seconds, VALUE nanoseconds)
 {
   int err;
   mqueue_t* data;
@@ -153,16 +153,16 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE seconds, VALUE nanoseconds, VALUE
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
+  if (!RB_TYPE_P(message, T_STRING)) { 
+    rb_raise(rb_eTypeError, "Message must be a string"); 
+  }
+
   if (!RB_TYPE_P(seconds, T_FIXNUM)) { 
     rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
   }
 
   if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
     rb_raise(rb_eTypeError, "First argument must be a fixnum"); 
-  }
-
-  if (!RB_TYPE_P(message, T_STRING)) { 
-    rb_raise(rb_eTypeError, "Message must be a string"); 
   }
 
   timeout.tv_sec  = FIX2ULONG(seconds);
