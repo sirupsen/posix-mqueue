@@ -13,6 +13,17 @@ Add `gem 'posix-mqueue'` to your favorite Gemfile.
 
 ## Usage
 
+### Important notes
+
+1. This will not work on OS X, but on Linux and probably BSD (not tested).
+2. `send` and `receive` block. `timedsend` and `timedreceive` do not.
+3. The default message size is `4096` bytes.
+4. Linux's default queue size is `10` bytes.
+
+Read on for details.
+
+### Example
+
 ```ruby
 require 'posix/mqueue'
 
@@ -55,12 +66,12 @@ m.unlink
 
 ```
 
-## mqueue
+### mqueue
 
 Most important information from the manpages, with a little added information
 about the behavior of `posix-mqueue`.
 
-## /proc interfaces
+### /proc interfaces
 
 Linux has some default limits you can easily change.
 
