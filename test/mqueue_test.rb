@@ -45,11 +45,17 @@ class MqueueTest < MiniTest::Unit::TestCase
     other.unlink
   end
 
-  def test_timedsendsend_raises_exception_instead_of_blocking
+  def test_timedsend_raises_exception_instead_of_blocking
     10.times { @queue.timedsend 0, 0, "walrus" }
 
     assert_raises POSIX::Mqueue::QueueFull do
       @queue.timedsend(0, 0, "hi")
+    end
+  end
+
+  def test_timedreceive_raises_exception_instead_of_blocking
+    assert_raises POSIX::Mqueue::QueueEmpty do
+      @queue.timedreceive(0, 0)
     end
   end
 

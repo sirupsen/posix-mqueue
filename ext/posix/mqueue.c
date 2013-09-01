@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 VALUE rb_cQueueFull = Qnil;
+VALUE rb_cQueueEmpty = Qnil;
 
 typedef struct {
   mqd_t fd;
@@ -94,6 +95,52 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   if (err < 0) {
     rb_sys_fail("Message sending failed, please consult mq_send(3)");
   }
+  
+  return Qtrue;
+}
+
+VALUE posix_mqueue_timedreceive(VALUE self, VALUE seconds, VALUE nanoseconds)
+{
+  int err;
+  mqueue_t* data;
+  size_t buf_size;
+  char *buf;
+  struct timespec timeout;
+  VALUE str;
+
+  TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
+
+  if (!RB_TYPE_P(seconds, T_FIXNUM)) { 
+    rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
+  }
+
+  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
+    rb_raise(rb_eTypeError, "First argument must be a fixnum"); 
+  }
+
+  timeout.tv_sec  = FIX2ULONG(seconds);
+  timeout.tv_nsec = FIX2ULONG(nanoseconds);
+
+  buf_size = data->attr.mq_msgsize + 1;
+
+  // Make sure the buffer is capable
+  buf = (char*)malloc(buf_size);
+
+  // TODO: Specify priority
+  err = mq_timedreceive(data->fd, buf, buf_size, NULL, &timeout);
+
+  if (err < 0) {
+    if(errno == 110) {
+      rb_raise(rb_cQueueEmpty, "Queue empty");
+    } else {
+      rb_sys_fail("Message sending failed, please consult mq_send(3)");
+    }
+  }
+
+  str = rb_str_new(buf, err);
+  free(buf);
+
+  return str;
   
   return Qtrue;
 }
@@ -199,12 +246,14 @@ void Init_mqueue()
   VALUE posix = rb_define_module("POSIX");
   VALUE mqueue = rb_define_class_under(posix, "Mqueue", rb_cObject);
   rb_cQueueFull = rb_define_class_under(mqueue, "QueueFull", rb_eStandardError);
+  rb_cQueueEmpty = rb_define_class_under(mqueue, "QueueEmpty", rb_eStandardError);
 
   rb_define_alloc_func(mqueue, posix_mqueue_alloc);
   rb_define_method(mqueue, "initialize", posix_mqueue_initialize, 1);
   rb_define_method(mqueue, "send", posix_mqueue_send, 1);
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
   rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, 3);
+  rb_define_method(mqueue, "timedreceive", posix_mqueue_timedreceive, 2);
   rb_define_method(mqueue, "unlink", posix_mqueue_unlink, 0);
 }
 
