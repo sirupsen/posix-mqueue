@@ -186,7 +186,7 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
   data->attr = attr;
   data->queue_len = RSTRING_LEN(queue);
   data->queue = ruby_strdup(StringValueCStr(queue));
-  data->fd = mq_open(data->queue, O_CREAT | O_RDWR, S_IRWXU | S_IRWXO | S_IRWXG, &data->attr);
+  data->fd = mq_open(data->queue, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &data->attr);
 
   if (data->fd == (mqd_t)-1) {
     rb_sys_fail("Failed opening the message queue");
