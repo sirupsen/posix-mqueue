@@ -52,6 +52,10 @@ static VALUE
 posix_mqueue_alloc(VALUE klass)
 {
   mqueue_t* data;
+
+  data->queue = NULL;
+  data->fd = -1;
+
   return TypedData_Make_Struct(klass, mqueue_t, &mqueue_type, data);
 }
 
@@ -131,6 +135,10 @@ VALUE posix_mqueue_initialize(VALUE self, VALUE queue)
 
   mqueue_t* data;
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
+
+  if (data->fd != (mqd_t)-1) {
+    rb_sys_fail("File descriptioner was illegaly modified before initialization")
+  }
 
   data->attr = attr;
   data->queue_len = RSTRING_LEN(queue);
