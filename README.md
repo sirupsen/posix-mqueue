@@ -54,30 +54,35 @@ Linux has some default limits you can easily change.
 The message queue is created as a virtual file system. That means you can mount
 it:
 
-    # sudo mkdir /dev/queue
-    # sudo mount -t mqueue none /dev/queue
+```bash
+# sudo mkdir /dev/queue
+# sudo mount -t mqueue none /dev/queue
+```
 
 Add a queue and a few tasks, count the characters (19):
 
-    $ irb
-    > require 'posix/mqueue'
-    => true
-    > m = POSIX::Mqueue.new("/queue")
-    => #<POSIX::Mqueue:0xb8c9fe88>
-    > m.send "narwhal"
-    => true
-    > m.send "walrus"
-    => true
-    > m.send "ponies"
-    => true
-    > exit
+```ruby
+$ irb
+> require 'posix/mqueue'
+=> true
+> m = POSIX::Mqueue.new("/queue")
+=> #<POSIX::Mqueue:0xb8c9fe88>
+> m.send "narwhal"
+=> true
+> m.send "walrus"
+=> true
+> m.send "ponies"
+=> true
+```
 
 Inspect the mounted filesystem:
 
-    $ ls /dev/queue/
-    important  mails  queue
-    $ cat /dev/queue/queue
-    QSIZE:19         NOTIFY:0     SIGNO:0     NOTIFY_PID:0
+```bash
+$ ls /dev/queue/
+important  mails  queue
+$ cat /dev/queue/queue
+QSIZE:19         NOTIFY:0     SIGNO:0     NOTIFY_PID:0
+```
 
 Here `QSIZE` is the bytes of data in the queue. The other flags are about
 notifications which `posix-mqueue` does not support currently, read about them
