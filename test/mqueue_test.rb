@@ -97,6 +97,10 @@ class MqueueTest < MiniTest::Unit::TestCase
     assert_equal 3, @queue.size
   end
 
+  def test_to_io
+    assert_instance_of IO, @queue.to_io
+  end
+
   private
   def with_queue(name, options = {})
     queue = POSIX::Mqueue.new(name, options)

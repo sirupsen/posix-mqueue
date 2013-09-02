@@ -211,6 +211,18 @@ VALUE posix_mqueue_size(VALUE self)
   return INT2FIX(queue.mq_curmsgs);
 }
 
+VALUE posix_mqueue_to_io(VALUE self)
+{
+  mqueue_t* data;
+  VALUE args[1];
+
+  TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
+
+  args[0] = INT2FIX(data->fd);
+
+  return rb_class_new_instance(1, args, rb_path2class("IO"));
+}
+
 VALUE posix_mqueue_msgsize(VALUE self)
 {
   mqueue_t* data;
@@ -311,5 +323,6 @@ void Init_mqueue()
   rb_define_method(mqueue, "msgsize", posix_mqueue_msgsize, 0);
   rb_define_method(mqueue, "size", posix_mqueue_size, 0);
   rb_define_method(mqueue, "unlink", posix_mqueue_unlink, 0);
+  rb_define_method(mqueue, "to_io", posix_mqueue_to_io, 0);
 }
 
