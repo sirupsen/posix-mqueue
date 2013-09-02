@@ -89,6 +89,8 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
     rb_raise(rb_eTypeError, "Message must be a string"); 
   }
 
+  rb_io_wait_writable(data->fd);
+
   // TODO: Custom priority
   err = mq_send(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10);
 
