@@ -71,7 +71,7 @@ class MqueueTest < MiniTest::Unit::TestCase
 
     # Set to the maximum for Linux
     with_queue "/big-queue", msgsize: 2 ** 13 do |q|
-      assert_equal 2 ** 13, q.msgsiza
+      assert_equal 2 ** 13, q.msgsize
 
       q.send('c' * (2 ** 13))
     end
