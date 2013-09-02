@@ -92,6 +92,10 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   // TODO: Custom priority
   err = mq_send(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10);
 
+  if(err < 0 && errno == EINTR) {
+    err = mq_send(data->fd, RSTRING_PTR(message), RSTRING_LEN(message), 10);
+  }
+
   if (err < 0) {
     rb_sys_fail("Message sending failed, please consult mq_send(3)");
   }
@@ -220,8 +224,13 @@ VALUE posix_mqueue_receive(VALUE self)
   // Make sure the buffer is capable
   buf = (char*)malloc(buf_size);
 
-  // TODO: Specify priority
+  rb_thread_wait_fd(data->fd);
+
   err = mq_receive(data->fd, buf, buf_size, NULL);
+
+  if(err < 0 && errno == EINTR) {
+    err = mq_receive(data->fd, buf, buf_size, NULL);
+  }
 
   if (err < 0) {
     rb_sys_fail("Message retrieval failed, please consult mq_receive(3)");
