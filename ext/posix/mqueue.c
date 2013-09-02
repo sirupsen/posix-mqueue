@@ -86,8 +86,8 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
-  if (!RB_TYPE_P(message, T_STRING)) { 
-    rb_raise(rb_eTypeError, "Message must be a string"); 
+  if (!RB_TYPE_P(message, T_STRING)) {
+    rb_raise(rb_eTypeError, "Message must be a string");
   }
 
   rb_io_wait_writable(data->fd);
@@ -102,7 +102,7 @@ VALUE posix_mqueue_send(VALUE self, VALUE message)
   if (err < 0) {
     rb_sys_fail("Message sending failed, please consult mq_send(3)");
   }
-  
+
   return Qtrue;
 }
 
@@ -122,12 +122,12 @@ VALUE posix_mqueue_timedreceive(VALUE self, VALUE args)
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
-  if (!RB_TYPE_P(seconds, T_FIXNUM)) { 
-    rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
+  if (!RB_TYPE_P(seconds, T_FIXNUM)) {
+    rb_raise(rb_eTypeError, "First argument must be a Fixnum");
   }
 
-  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
-    rb_raise(rb_eTypeError, "Second argument must be a Fixnum"); 
+  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) {
+    rb_raise(rb_eTypeError, "Second argument must be a Fixnum");
   }
 
   timeout.tv_sec  = FIX2ULONG(seconds);
@@ -169,16 +169,16 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
 
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
-  if (!RB_TYPE_P(message, T_STRING)) { 
-    rb_raise(rb_eTypeError, "Message must be a string"); 
+  if (!RB_TYPE_P(message, T_STRING)) {
+    rb_raise(rb_eTypeError, "Message must be a string");
   }
 
   if (!RB_TYPE_P(seconds, T_FIXNUM)) {
-    rb_raise(rb_eTypeError, "First argument must be a Fixnum"); 
+    rb_raise(rb_eTypeError, "First argument must be a Fixnum");
   }
 
-  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) { 
-    rb_raise(rb_eTypeError, "Second argument must be a Fixnum"); 
+  if (!RB_TYPE_P(nanoseconds, T_FIXNUM)) {
+    rb_raise(rb_eTypeError, "Second argument must be a Fixnum");
   }
 
   timeout.tv_sec  = FIX2ULONG(seconds);
@@ -193,7 +193,7 @@ VALUE posix_mqueue_timedsend(VALUE self, VALUE args)
       rb_sys_fail("Message sending failed, please consult mq_send(3)");
     }
   }
-  
+
   return Qtrue;
 }
 
@@ -271,14 +271,30 @@ VALUE posix_mqueue_receive(VALUE self)
   return str;
 }
 
-VALUE posix_mqueue_initialize(VALUE self, VALUE args)
+VALUE posix_mqueue_initialize(int argc, VALUE* argv, VALUE self)
 {
-  VALUE options = rb_ary_entry(args, 1);
-  if (options == Qnil) options = rb_hash_new();
+  if(argc < 1)
+  {
+    rb_raise(rb_eArgError, "initialize requires at least one argument");
+  }
+
+  VALUE queue = argv[0];
+  if (!RB_TYPE_P(queue, T_STRING)) {
+    rb_raise(rb_eTypeError, "Queue name must be a string");
+  }
+
+  VALUE options;
+  if (argc < 2)
+  {
+    options = rb_hash_new();
+  }
+  else
+  {
+    options = argv[1];
+  }
 
   int msgsize = FIX2INT(rb_hash_lookup2(options, ID2SYM(rb_intern("msgsize")), INT2FIX(4096)));
   int maxmsg = FIX2INT(rb_hash_lookup2(options, ID2SYM(rb_intern("maxmsg")), INT2FIX(10)));
-  VALUE queue = rb_ary_entry(args, 0);
 
   struct mq_attr attr = {
     .mq_flags   = 0,          // Flags, 0 or O_NONBLOCK
@@ -315,7 +331,7 @@ void Init_mqueue()
   rb_cQueueEmpty = rb_define_class_under(mqueue, "QueueEmpty", rb_eStandardError);
 
   rb_define_alloc_func(mqueue, posix_mqueue_alloc);
-  rb_define_method(mqueue, "initialize", posix_mqueue_initialize, -2);
+  rb_define_method(mqueue, "initialize", posix_mqueue_initialize, -1);
   rb_define_method(mqueue, "send", posix_mqueue_send, 1);
   rb_define_method(mqueue, "receive", posix_mqueue_receive, 0);
   rb_define_method(mqueue, "timedsend", posix_mqueue_timedsend, -2);
