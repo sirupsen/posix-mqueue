@@ -9,7 +9,7 @@ offers:
 * Blocking and non-blocking. Listeners block until a message arrives on the
   queue. No polling. Sending messages doesn't block.
 
-Add `gem 'posix-mqueue', :git => "git@github.com:Sirupsen/posix-mqueue.git"` to your favorite Gemfile.
+Add `gem 'posix-mqueue'` to your favorite Gemfile.
 
 ## Usage
 
