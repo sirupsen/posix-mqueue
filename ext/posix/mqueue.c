@@ -15,6 +15,7 @@ VALUE rb_cQueueEmpty = Qnil;
 
 typedef struct {
   mqd_t fd;
+  VALUE io;
   struct mq_attr attr;
   size_t queue_len;
   char *queue;
@@ -24,6 +25,8 @@ mqueue_t;
 static void
 mqueue_mark(void* ptr)
 {
+  mqueue_t* data = ptr;
+  rb_gc_mark(data->io);
   (void)ptr;
 }
 
@@ -33,6 +36,8 @@ mqueue_free(void* ptr)
   mqueue_t* data = ptr;
   mq_close(data->fd);
   xfree(data->queue);
+  // ??
+  // xfree(data->io);
   xfree(ptr);
 }
 
@@ -214,13 +219,9 @@ VALUE posix_mqueue_size(VALUE self)
 VALUE posix_mqueue_to_io(VALUE self)
 {
   mqueue_t* data;
-  VALUE args[1];
-
   TypedData_Get_Struct(self, mqueue_t, &mqueue_type, data);
 
-  args[0] = INT2FIX(data->fd);
-
-  return rb_class_new_instance(1, args, rb_path2class("IO"));
+  return data->io;
 }
 
 VALUE posix_mqueue_msgsize(VALUE self)
@@ -319,6 +320,11 @@ VALUE posix_mqueue_initialize(int argc, VALUE* argv, VALUE self)
   if (data->fd == (mqd_t)-1) {
     rb_sys_fail("Failed opening the message queue, please consult mq_open(3)");
   }
+
+  VALUE args[1];
+  args[0] = INT2FIX(data->fd);
+
+  data->io = rb_class_new_instance(1, args, rb_path2class("IO"));
 
   return self;
 }
