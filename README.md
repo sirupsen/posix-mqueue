@@ -1,4 +1,4 @@
-# posix-mqueue
+# posix-mqueue [![Build Status](https://travis-ci.org/Sirupsen/posix-mqueue.png?branch=master)](https://travis-ci.org/Sirupsen/posix-mqueue)
 
 Minimal wrapper around the [POSIX message queue](pmq). The POSIX message queue
 offers:
@@ -49,7 +49,7 @@ m.receive
 m.size
 # => 10
 
-# #send will block until something is popped off the now full queue.  
+# #send will block until something is popped off the now full queue.
 # timesend takes timeout arguments (first one is seconds, second is
 # nanoseconds). Pass 0 for for both to not block, this is default.
 
