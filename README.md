@@ -9,7 +9,9 @@ offers:
 * Blocking and non-blocking. Listeners block until a message arrives on the
   queue. No polling. Sending messages doesn't block.
 
-Add `gem 'posix-mqueue'` to your favorite Gemfile.
+Add `gem 'posix-mqueue'` to your favorite Gemfile. Note that POSIX Message
+Queues are not available on OS X, however, System V Message Queues are. See my
+[SysV MQ wrapper](https://github.com/Sirupsen/sysvmq).
 
 ## Usage
 
