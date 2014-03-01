@@ -9,11 +9,17 @@ offers:
 * Blocking and non-blocking. Listeners block until a message arrives on the
   queue. No polling. Sending messages doesn't block.
 
-Add `gem 'posix-mqueue'` to your favorite Gemfile. Note that POSIX Message
-Queues are not available on OS X, however, System V Message Queues are. See my
-[SysV MQ wrapper](https://github.com/Sirupsen/sysvmq).
+
+Note that this requires no third party message broker. The messages are handled
+by the kernel of your computer. Not all kernels have support for POSIX message
+queues, a notably example is Darwin (OS X). Darwin implements the older System V
+IPC API. See my [SysV MQ wrapper](https://github.com/Sirupsen/sysvmq).
 
 ## Usage
+
+In your Gemfile:
+
+`gem 'posix-mqueue'`
 
 ### Important notes
 
