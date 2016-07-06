@@ -93,8 +93,8 @@ Linux has some default limits you can easily change.
    single queue. Defaults to 10. You should increase that number. `#send` will
    eventually block if the queue is full. `#timedsend` will throw `QueueFull`.
 2. `/proc/sys/fs/mqueue/msgsize_max`. Maximum size of a single message. Defaults
-   to 8192 bytes. `posix-mqueue` allows up to 4096 bytes. Overwrite this by
-   passing `{maxmsg: 8192}` as the second argument when initializing.
+   to 8192 bytes. `posix-mqueue` defaults to 4096 bytes. Overwrite this by
+   passing `{msgsize: 8192}` as the second argument when initializing.
 3. `/proc/sys/fs/mqueue/queues_max`. Maximum number of queues on the system.
    Defaults to 256.
 
